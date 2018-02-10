@@ -1,21 +1,19 @@
 
-# Segments
-The LED strip can be divided into segments. Each segments is identified by their assigned index. These segments each have their own pattern.
-
+# Blocks
+The LED strip can be divided into blocks. Each block is identified by their assigned index.
 
 # Modes
-Every segment has one mode that dictates it's behaviour.
+Every block has one mode that dictates it's behaviour. All current modes are outlined below.
 
 ## None
-Does nothing. This is the default mode. All LEDs are turned off.
+Does nothing. This is the default mode. All pixels are turned off.
 
 ## Unified
-Everything has a single color.
+All pixels have a single color.
 - `color`: RGBA
 
 ## Segmented
-A repeated pattern of colors. If `blend` is specified then there will be a gradient exctly `blend` pixels long between every two segments.
-The `alignment` dictates at which part of the segment the pattern starts, and `direction` specifies in which direction the pattern moves, if at all. This also requires `speed` to be specified and greater than zero.
+A repeated pattern of colors. If `blend` is specified then there will be a gradient exctly `blend` pixels long between every two segments. The `alignment` dictates at which part of the block the pattern starts, and `direction` specifies in which direction the pattern moves, if at all. This also requires `speed` to be specified and have a value greater than zero.
 - `segments`: []
   + `color`: RGBA
   + `length`: pixels
