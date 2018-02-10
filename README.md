@@ -3,7 +3,7 @@
 The LED strip can be divided into blocks. Each block is identified by their assigned index.
 
 # Modes
-Every block has one mode that dictates it's behaviour. All current modes are outlined below.
+Every block has one mode that dictates its behaviour. All current modes are outlined below.
 
 ## None
 Does nothing. This is the default mode. All pixels are turned off.
