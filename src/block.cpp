@@ -18,12 +18,16 @@ void Block::render() {
   this->_mode->render(this->_pixels);
 
   // render effects
-  if (this->_events.size() > 0) {
+  while (this->_events.size() > 0) {
     Event* ev = this->_events.front();
-    if (!ev->render(this->_pixels)) {
-      delete ev;
-      this->_events.pop();
-    }
+
+    // on success, break
+    if (ev->render(this->_pixels))
+      break;
+
+    // on failure, get next event instead
+    delete ev;
+    this->_events.pop();
   }
 }
 
