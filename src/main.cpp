@@ -108,10 +108,29 @@ void setup() {
       server.send(200, "text/plain", "hahaha post");
   });
 
-  server.on("/event", [](){
-    Event* ev = (Event*)new EventBlink();
-    block->event(ev);
-    server.send(200, "text/plain", "event started");
+  server.on("/event", HTTPMethod::HTTP_PUT, [](){
+    block->event(new EventBlink());
+    server.send(200, "text/plain", "");
+  });
+
+  server.on("/body", [](){
+    if (!server.hasArg("plain")) {
+      server.send(400, "text/plain", "no body received");
+      return;
+    }
+
+    // get raw
+    String raw = server.arg("plain");
+    StaticJsonBuffer<1024> buff;
+
+    JsonObject& root = buff.parseObject(raw);
+    if (!root.success()) {
+      server.send(400, "text/plain", "body is not valid json");
+      return;
+    }
+
+    Serial.println(server.arg("plain"));
+    server.send(200, "text/plain", server.arg("plain"));
   });
 
   server.onNotFound(handleNotFound);
