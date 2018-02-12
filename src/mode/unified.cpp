@@ -34,11 +34,11 @@ ModeUnified::~ModeUnified() {
   }
 }
 
-void ModeUnified::configure(JsonObject &conf) {
+void ModeUnified::configure(JsonObject& conf) {
   // TODO
 }
 
-void ModeUnified::render(Pixels *pixels) {
+void ModeUnified::render(Pixels* pixels) {
 
   // Start transition if necessary
   this->_transTicker++;

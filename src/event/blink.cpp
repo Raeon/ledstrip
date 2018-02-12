@@ -1,18 +1,14 @@
 #include "blink.h"
 
-EventBlink::EventBlink() {
-  this->_color = new RGBA(255, 0, 0, 255);
+EventBlink::EventBlink(RGBA* color, uint8_t times, uint8_t length) {
+  this->_color = color;
 
-  this->_blinkTimes = 0;
+  this->_blinkTimes = times;
   this->_blinkCount = 0;
 
   this->_blink = true;
-  this->_blinkLength = 0;
+  this->_blinkLength = length;
   this->_blinkTicker = 0;
-
-  // TODO: remove after this line
-  this->_blinkTimes = 4;
-  this->_blinkLength = 15; // 10 * 20ms = 200ms
 }
 
 EventBlink::~EventBlink() {

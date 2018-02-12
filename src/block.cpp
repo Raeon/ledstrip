@@ -18,16 +18,15 @@ void Block::render() {
   this->_mode->render(this->_pixels);
 
   // render effects
-  for (auto iter = this->_events.begin(); iter != this->_events.end(); iter++) {
-    bool keep = (*iter)->render(this->_pixels);
-    if (!keep) {
-      delete *iter; // set the bytes freeeee!
-      this->_events.erase(iter);
-      iter--;
+  if (this->_events.size() > 0) {
+    Event* ev = this->_events.front();
+    if (!ev->render(this->_pixels)) {
+      delete ev;
+      this->_events.pop();
     }
   }
 }
 
 void Block::event(Event* ev) {
-  this->_events.push_back(ev);
+  this->_events.push(ev);
 }

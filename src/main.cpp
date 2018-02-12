@@ -8,6 +8,7 @@
 #include <Ticker.h>
 #include "block.h"
 #include "event/blink.h"
+#include "json.h"
 
 #define COLOR_ORDER GRB
 #define LED_TYPE WS2812B
@@ -15,10 +16,6 @@
 #define DATA_PIN D1
 
 CRGB leds[NUM_LEDS];
-bool going_up = true;
-int pos = 1;
-
-int colors[3] = {255, 0, 0};
 
 const char* ssid = "Klein Tijssink 2.4GHz";
 const char* password = "Hoor wie klopt daar kinderen?";
@@ -36,7 +33,7 @@ void handleNotFound(){
   message += "URI: ";
   message += server.uri();
   message += "\nMethod: ";
-  message += (server.method() == HTTP_GET)?"GET":"POST";
+  message += (server.method() == HTTP_GET) ? "GET" : "POST";
   message += "\nArguments: ";
   message += server.args();
   message += "\n";
@@ -44,27 +41,6 @@ void handleNotFound(){
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-}
-
-void handleMode() {
-
-}
-
-void updateLEDs() {
-  // colors[pos] += going_up ? 1 : -1;
-  // if (colors[pos] == (going_up ? 255 : 0)) {
-  //   pos = going_up ? (pos - 1) : (pos + 2);
-  //   if (pos < 0)
-  //     pos = 3 + pos;
-  //   if (pos > 2)
-  //     pos = pos - 3;
-  //   going_up = !going_up;
-  // }
-  //
-  // for (int i = 0; i < NUM_LEDS; i++)
-  //   leds[i] = CRGB(colors[0], colors[1], colors[2]);
-  block->render();
-  FastLED.show();
 }
 
 void setup() {
@@ -108,39 +84,33 @@ void setup() {
       server.send(200, "text/plain", "hahaha post");
   });
 
-  server.on("/event", HTTPMethod::HTTP_PUT, [](){
-    block->event(new EventBlink());
-    server.send(200, "text/plain", "");
-  });
+  onJSON(server, "/event", [](JsonObject& root){
 
-  server.on("/body", [](){
-    if (!server.hasArg("plain")) {
-      server.send(400, "text/plain", "no body received");
+    JsonError* e;
+    EventBlink* ev;
+    e = json_EventBlink(root, &ev);
+
+    if (e != NULL) {
+      server.send(400, "text/plain", e->tostr());
+      delete e;
       return;
     }
 
-    // get raw
-    String raw = server.arg("plain");
-    StaticJsonBuffer<1024> buff;
-
-    JsonObject& root = buff.parseObject(raw);
-    if (!root.success()) {
-      server.send(400, "text/plain", "body is not valid json");
-      return;
-    }
-
-    Serial.println(server.arg("plain"));
-    server.send(200, "text/plain", server.arg("plain"));
+    // Initiate the event
+    block->event((Event*) ev);
+    server.send(200, "text/plain", "event started");
   });
 
   server.onNotFound(handleNotFound);
   server.begin();
 
   Serial.println("HTTP server started");
-  ticker.attach_ms(20, updateLEDs);
+  ticker.attach_ms(20, [](){
+    block->render();
+    FastLED.show();
+  });
 }
 
 void loop() {
-  //FastLED.show();
   server.handleClient();
 }
