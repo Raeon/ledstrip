@@ -51,3 +51,7 @@ bool EventBlink::render(Pixels *pixels) {
   }
   return true;
 }
+
+const bool EventBlink::parallel() {
+  return false;
+}

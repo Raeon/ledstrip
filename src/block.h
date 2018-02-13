@@ -2,7 +2,7 @@
 #define _BLOCK_H
 
 #include <cstdint>
-#include <queue>
+#include <list>
 #include "render.h"
 #include "mode.h"
 #include "event.h"
@@ -12,7 +12,7 @@ private:
   Pixels* _pixels;
 
   Mode* _mode;
-  std::queue<Event*> _events;
+  std::list<Event*> _events;
 
 public:
   Block(CRGB* pixv, uint16_t pixc);

@@ -18,19 +18,26 @@ void Block::render() {
   this->_mode->render(this->_pixels);
 
   // render effects
-  while (this->_events.size() > 0) {
-    Event* ev = this->_events.front();
+  bool first = true;
+  for (std::list<Event*>::iterator iter = this->_events.begin(); iter != this->_events.end(); iter++) {
+    Event* ev = *iter;
 
-    // on success, break
-    if (ev->render(this->_pixels))
-      break;
+    // only run if first or parallel
+    if (first || ev->parallel()) {
 
-    // on failure, get next event instead
-    delete ev;
-    this->_events.pop();
+      // if result is false remove it and go to next without setting first=false!
+      // (since nothing is rendered if false is returned)
+      if (!ev->render(this->_pixels)) {
+        delete ev;
+        this->_events.erase(iter--);
+        continue;
+      }
+      
+      first = false;
+    }
   }
 }
 
 void Block::event(Event* ev) {
-  this->_events.push(ev);
+  this->_events.push_back(ev);
 }

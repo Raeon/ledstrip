@@ -7,6 +7,7 @@ class Event {
 public:
   virtual void configure(JsonObject& conf) = 0;
   virtual bool render(Pixels* pixels) = 0;
+  virtual const bool parallel() = 0;
 };
 
 #endif /* end of include guard: _EVENT_H */

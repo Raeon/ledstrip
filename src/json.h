@@ -9,9 +9,10 @@
 
 using namespace std;
 
-typedef void (*TJsonHandlerFunction)(JsonObject& root);
+typedef void (*JsonHandler)(JsonObject& root);
 
-void onJSON(ESP8266WebServer& server, const String& uri, TJsonHandlerFunction handler);
+void onJSON(ESP8266WebServer& server, const String& uri, JsonHandler handler);
+void onJSON(ESP8266WebServer& server, const String& uri, HTTPMethod method, JsonHandler handler);
 
 class JsonError {
 private:

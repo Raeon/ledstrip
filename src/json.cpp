@@ -23,8 +23,12 @@ const String& JsonError::tostr() {
   return *(this->_msg);
 }
 
-void onJSON(ESP8266WebServer& server, const String& uri, TJsonHandlerFunction handler) {
- server.on(uri, [&server, handler](){
+void onJSON(ESP8266WebServer& server, const String& uri, JsonHandler handler) {
+  onJSON(server, uri, HTTPMethod::HTTP_GET, handler);
+}
+
+void onJSON(ESP8266WebServer& server, const String& uri, HTTPMethod method, JsonHandler handler) {
+ server.on(uri, method, [&server, handler](){
    // Check if body is specified
    if (!server.hasArg("plain")) {
      server.send(400, "text/plain", "no JSON body given");

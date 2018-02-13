@@ -19,6 +19,7 @@ public:
   ~EventBlink();
   void configure(JsonObject& conf);
   bool render(Pixels* pixels);
+  const bool parallel();
 };
 
 #endif /* end of include guard: _EVENT_BLINK_H */
