@@ -5,23 +5,26 @@
 
 class ModeUnified : public Mode {
 private:
+    // Colors
+    RGBA** _colors;
+    uint8_t _colorIndex;
+    uint8_t _colorCount;
 
-  // Colors
-  RGBA** _colors;
-  uint8_t _colorIndex;
-  uint8_t _colorCount;
-
-  // Transitions
-  bool _trans; // are we transitioning right now?
-  uint16_t _transInterval; // updates between transitions
-  uint16_t _transLength; // updates that a transition takes
-  uint16_t _transTicker; // keeps track of when we are
+    // Transitions
+    bool _trans; // are we transitioning right now?
+    uint16_t _transInterval; // updates between transitions
+    uint16_t _transLength; // updates that a transition takes
+    uint16_t _transTicker; // keeps track of when we are
 
 public:
-  ModeUnified();
-  ~ModeUnified();
-  void configure(JsonObject& conf);
-  void render(Pixels* pixels);
+    ModeUnified();
+    ~ModeUnified();
+    void configure(JsonObject& conf);
+    void render(Pixels* pixels);
+
+    void serialize(JsonObject& parent);
+    void serialize(JsonObject& parent, const String& key);
+    JsonError* deserialize(JsonObject& parent, Mode** p, const String& key);
 };
 
 #endif /* end of include guard: _MODE_UNIFIED_H */

@@ -55,3 +55,34 @@ bool EventBlink::render(Pixels *pixels) {
 const bool EventBlink::parallel() {
   return false;
 }
+
+
+void EventBlink::serialize(JsonObject& root) {
+    this->_color->serialize(root, "color");
+    root["times"] = this->_blinkTimes;
+    root["length"] = this->_blinkLength;
+}
+
+void EventBlink::serialize(JsonObject& parent, const String& key) {
+    JsonObject& root = parent.createNestedObject(key);
+    this->serialize(root);
+}
+
+JsonError* EventBlink::deserialize(JsonObject& parent, EventBlink** p, const String& key) {
+    if (!parent.containsKey(key)) return new JsonError("missing key: " + key);
+
+    JsonObject& root = parent[key];
+    JsonError* e = NULL;
+
+    RGBA* color;
+    uint8_t times;
+    uint8_t length;
+
+    if ((e = RGBA::deserialize(root, &color, "color"))
+        || (e = json_uint8_t(root, &times, "times"))
+        || (e = json_uint8_t(root, &length, "length")))
+        return e->trace("when parsing EventBlink: ");
+
+    *p = new EventBlink(color, times, length);
+    return NULL;
+}

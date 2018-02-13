@@ -26,7 +26,6 @@ const char* password = "Hoor wie klopt daar kinderen?";
 
 ESP8266WebServer server(80);
 Ticker ticker;
-Block* block = NULL;
 
 unordered_map<size_t, Block*> blocks;
 
@@ -38,11 +37,16 @@ void setup() {
     // blocks.insert(block, block);
 
     // LEDs
-    // FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);
-    // FastLED.setBrightness(50);
-    // for (int i = 0; i < NUM_LEDS; i++)
-    //   leds[i] = CRGB(255, 0, 0); // default is red
+    FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+    FastLED.setBrightness(50);
+    for (int i = 0; i < NUM_LEDS; i++)
+       leds[i] = CRGB(255, 0, 0); // default is RED
+    
+    // Default block
+    Block* block = new Block(leds, NUM_LEDS);
+    blocks[(size_t)block] = block;
 
+    // WiFi
     Serial.begin(115200);
     WiFi.setSleepMode(WIFI_NONE_SLEEP);
     WiFi.mode(WIFI_STA);
@@ -82,30 +86,73 @@ void setup() {
     */
 
     /*
-        GET /block
-        Returns information about the given block
+        GET /blocks
+        Returns all currently existing blocks in JSON serialized form.
     */
-    onJSON(server, "/block/get", HTTPMethod::HTTP_POST, [](JsonObject& root) {
+    server.on("/blocks", HTTP_GET, [](){
+        // init
+        DynamicJsonBuffer buff;
+        JsonObject& result = buff.createObject();
 
-        uint8_t blockID;
+        // serialize all blocks
+        for (auto iter = blocks.begin(); iter != blocks.end(); iter++) {
+            iter->second->serialize(result, String(iter->first));
+        }
+
+        // return
+        String out;
+        result.printTo(out);
+        server.send(200, "application/json", out);
+    });
+
+    /*
+        POST /blocks/get
+        Returns the given block in JSON serialized form.
+    */
+    onJSON(server, "/blocks/get", HTTP_POST, [](JsonObject& root) {
+
+        size_t blockAddr;
         JsonError* e;
 
         // blockID
-        if (e = json_uint8_t(root, &blockID, "blockID")) {
+        if (e = json_size_t(root, &blockAddr, "block")) {
             server.send(400, "text/plain", e->tostr());
             delete e;
             return;
         }
 
         // fetch block
+        Block* b;
+        if (blocks.find(blockAddr) == blocks.end()) {
+            server.send(404, "text/plain", "block not found");
+            return;
+        }
+        b = blocks[blockAddr];
 
+        // serialize
+        DynamicJsonBuffer buff;
+        JsonObject& result = buff.createObject();
+        b->serialize(result);
+
+        // return result
+        String out;
+        result.printTo(out);
+        server.send(200, "application/json", out);
     });
 
-    onJSON(server, "/event", [](JsonObject& root) {
+    /*
+        EVENTS
+    */
+
+    /*
+        POST /event
+        Creates a blink event with the given parameters.
+    */
+    onJSON(server, "/event", HTTP_POST, [](JsonObject& root) {
 
         JsonError* e;
         EventBlink* ev;
-        e = json_EventBlink(root, &ev);
+        e = EventBlink::deserialize(root, &ev, "blink");
 
         if (e != NULL) {
             server.send(400, "text/plain", e->tostr());
@@ -114,10 +161,15 @@ void setup() {
         }
 
         // Initiate the event
-        block->event((Event*) ev);
+        (*blocks.begin()).second->event((Event*) ev);
         server.send(200, "text/plain", "event started");
     });
 
+    /*
+        OTHER
+    */
+
+    /* 404 */
     server.onNotFound([]() {
         String message = "File Not Found\n\n";
         message += "URI: ";
@@ -136,7 +188,9 @@ void setup() {
 
     Serial.println("HTTP server started");
     ticker.attach_ms(20, []() {
-        block->render();
+        for (std::unordered_map<size_t, Block*>::iterator iter = blocks.begin(); iter != blocks.end(); iter++) {
+            iter->second->render();
+        }
         FastLED.show();
     });
 }

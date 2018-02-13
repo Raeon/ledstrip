@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "list": "cpp"
+        "list": "cpp",
+        "functional": "cpp"
+    },
+    "terminal.integrated.env.linux": {
+        "PATH": "/home/joris/.platformio/penv/bin:/home/joris/.platformio/penv:/usr/local/sbin:/usr/local/bin:/usr/bin:/opt/cuda/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/joris/.config/scripts:/usr/lib/node_modules",
+        "PLATFORMIO_CALLER": "vscode"
     }
 }

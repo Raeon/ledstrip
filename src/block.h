@@ -1,26 +1,31 @@
 #ifndef _BLOCK_H
 #define _BLOCK_H
 
+#include "event.h"
+#include "json.h"
+#include "mode.h"
+#include "render.h"
 #include <cstdint>
 #include <list>
-#include "render.h"
-#include "mode.h"
-#include "event.h"
 
 class Block {
 private:
-  Pixels* _pixels;
+    Pixels* _pixels;
 
-  Mode* _mode;
-  std::list<Event*> _events;
+    Mode* _mode;
+    std::list<Event*> _events;
 
 public:
-  Block(CRGB* pixv, uint16_t pixc);
+    Block(CRGB* pixv, uint16_t pixc);
 
-  void configure(JsonObject& conf);
-  void render();
+    void configure(JsonObject& conf);
+    void render();
 
-  void event(Event* ev);
+    void event(Event* ev);
+
+    void serialize(JsonObject& parent);
+    void serialize(JsonObject& parent, const String& key);
+    static JsonError* deserialize(JsonObject& parent, Block* &p, const String& key);
 };
 
 #endif /* end of include guard: _BLOCK_H */

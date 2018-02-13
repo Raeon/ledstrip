@@ -5,21 +5,25 @@
 
 class EventBlink : public Event {
 private:
-  RGBA* _color;
+    RGBA* _color;
 
-  uint8_t _blinkTimes; // how many times we should blink
-  uint8_t _blinkCount; // how many times we have blinked
+    uint8_t _blinkTimes; // how many times we should blink
+    uint8_t _blinkCount; // how many times we have blinked
 
-  bool _blink;
-  uint16_t _blinkLength; // ticks before flipping
-  uint16_t _blinkTicker; // tick counter
+    bool _blink;
+    uint16_t _blinkLength; // ticks before flipping
+    uint16_t _blinkTicker; // tick counter
 
 public:
-  EventBlink(RGBA* color, uint8_t times, uint8_t length);
-  ~EventBlink();
-  void configure(JsonObject& conf);
-  bool render(Pixels* pixels);
-  const bool parallel();
+    EventBlink(RGBA* color, uint8_t times, uint8_t length);
+    ~EventBlink();
+    void configure(JsonObject& conf);
+    bool render(Pixels* pixels);
+    const bool parallel();
+
+    void serialize(JsonObject& root);
+    void serialize(JsonObject& root, const String& key);
+    static JsonError* deserialize(JsonObject& root, EventBlink** p, const String& key);
 };
 
 #endif /* end of include guard: _EVENT_BLINK_H */
