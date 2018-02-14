@@ -19,7 +19,7 @@ using namespace std;
 #define NUM_LEDS 189
 #define DATA_PIN D1
 
-CRGB leds[NUM_LEDS];
+CRGB* leds = new CRGB[NUM_LEDS];
 
 const char* ssid     = "Klein Tijssink 2.4GHz";
 const char* password = "Hoor wie klopt daar kinderen?";
@@ -40,11 +40,11 @@ void setup() {
     FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);
     FastLED.setBrightness(50);
     for (int i = 0; i < NUM_LEDS; i++)
-       leds[i] = CRGB(255, 0, 0); // default is RED
-    
+        leds[i] = CRGB(255, 0, 0); // default is RED
+
     // Default block
-    Block* block = new Block(leds, NUM_LEDS);
-    blocks[(size_t)block] = block;
+    Block* block           = new Block(leds, NUM_LEDS);
+    blocks[(size_t) block] = block;
 
     // WiFi
     Serial.begin(115200);
@@ -86,10 +86,10 @@ void setup() {
     */
 
     /*
-        GET /blocks
+        POST /blocks
         Returns all currently existing blocks in JSON serialized form.
     */
-    server.on("/blocks", HTTP_GET, [](){
+    server.on("/blocks", HTTP_POST, []() {
         // init
         DynamicJsonBuffer buff;
         JsonObject& result = buff.createObject();
@@ -106,15 +106,58 @@ void setup() {
     });
 
     /*
-        POST /blocks/get
+        POST /block/create
+        Creates a new block
+    */
+    onJSON(server, "/block/create", HTTP_POST, [](JsonObject& root) {
+
+        // fetch arguments
+        uint16_t index, length;
+        JsonError* e;
+
+        if ((e = json_uint16_t(root, &index, "index"))
+            || (e = json_uint16_t(root, &length, "length"))) {
+            server.send(400, "text/plain", e->tostr());
+            delete e;
+            return;
+        }
+
+        // validate the arguments
+        if (index > NUM_LEDS) {
+            server.send(400, "text/plain", "index out of bounds");
+            return;
+        }
+        if (index + length > NUM_LEDS) {
+            server.send(400, "text/plain", "index+length out of bounds");
+            return;
+        }
+
+        // create block
+        Block* b = new Block(&leds[index], length);
+        blocks[(size_t)b] = b;
+        // TODO: check for overlap and/or too many blocks
+
+        // build result
+        DynamicJsonBuffer buff;
+        JsonObject& result = buff.createObject();
+        result["block"] = (size_t)b;
+        
+        // return result
+        String str;
+        result.printTo(str);
+        server.send(200, "application/json", str);
+    });
+
+    /*
+        POST /block/get
         Returns the given block in JSON serialized form.
     */
-    onJSON(server, "/blocks/get", HTTP_POST, [](JsonObject& root) {
+    onJSON(server, "/block/get", HTTP_POST, [](JsonObject& root) {
 
         size_t blockAddr;
         JsonError* e;
 
-        // blockID
+        // block identifier
         if (e = json_size_t(root, &blockAddr, "block")) {
             server.send(400, "text/plain", e->tostr());
             delete e;
@@ -138,6 +181,37 @@ void setup() {
         String out;
         result.printTo(out);
         server.send(200, "application/json", out);
+    });
+
+    /*
+        POST /block/delete
+        Deletes the specified block and turns off all pixels.
+    */
+    onJSON(server, "/block/delete", HTTP_POST, [](JsonObject& root) {
+        
+        size_t blockAddr;
+        JsonError* e;
+
+        // block identifier
+        if (e = json_size_t(root, &blockAddr, "block")) {
+            server.send(400, "text/plain", e->tostr());
+            delete e;
+            return;
+        }
+
+        // check validity
+        if (blocks.find(blockAddr) == blocks.end()) {
+            server.send(404, "text/plain", "block does not exist");
+            return;
+        }
+
+        // fetch and delete
+        Block* b = blocks[blockAddr];
+        blocks.erase(blockAddr);
+        delete b;
+
+        // return success
+        server.send(200, "application/json", "{\"result\": true}");
     });
 
     /*

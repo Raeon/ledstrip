@@ -17,10 +17,12 @@ private:
 
 public:
     Block(CRGB* pixv, uint16_t pixc);
+    ~Block();
 
     void configure(JsonObject& conf);
     void render();
 
+    void mode(Mode* m);
     void event(Event* ev);
 
     void serialize(JsonObject& parent);

@@ -1,12 +1,27 @@
 #include "block.h"
-#include "mode/unified.h"
+#include "mode/none.h"
 
 Block::Block(CRGB* colors, uint16_t len) {
     this->_pixels         = new Pixels;
     this->_pixels->colors = colors;
     this->_pixels->len    = len;
 
-    this->_mode = new ModeUnified();
+    this->_mode = new ModeNone();
+}
+
+Block::~Block() {
+    // reset pixels
+    CRGB* pix = this->_pixels->colors;
+    for (int i = 0; i < this->_pixels->len; i++) {
+        pix[i].r = 0;
+        pix[i].g = 0;
+        pix[i].b = 0;
+        pix++;
+    }
+
+    // clean up
+    delete this->_pixels;
+    delete this->_mode;
 }
 
 void Block::configure(JsonObject& conf) {
@@ -36,6 +51,11 @@ void Block::render() {
             first = false;
         }
     }
+}
+
+void Block::mode(Mode* m) {
+    delete this->_mode;
+    this->_mode = m;
 }
 
 void Block::event(Event* ev) {
