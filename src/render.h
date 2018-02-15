@@ -34,7 +34,8 @@ public:
 
     void serialize(JsonObject& root);
     void serialize(JsonObject& parent, const String& key);
-    static JsonError* deserialize(JsonObject& root, RGBA** p, const String& key);
+    static JsonError* deserialize(JsonObject& root, RGBA** p);
+    static JsonError* deserialize(JsonObject& parent, RGBA** p, const String& key);
 };
 
 // Pixels

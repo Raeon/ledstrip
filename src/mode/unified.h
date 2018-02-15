@@ -22,9 +22,10 @@ public:
     void configure(JsonObject& conf);
     void render(Pixels* pixels);
 
-    void serialize(JsonObject& parent);
+    void serialize(JsonObject& root);
     void serialize(JsonObject& parent, const String& key);
-    JsonError* deserialize(JsonObject& parent, Mode** p, const String& key);
+    static JsonError* deserialize(JsonObject& root, Mode** p);
+    static JsonError* deserialize(JsonObject& parent, Mode** p, const String& key);
 };
 
 #endif /* end of include guard: _MODE_UNIFIED_H */

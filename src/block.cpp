@@ -1,22 +1,19 @@
 #include "block.h"
-#include "mode/none.h"
+#include "mode/unified.h"
 
 Block::Block(CRGB* colors, uint16_t len) {
     this->_pixels         = new Pixels;
     this->_pixels->colors = colors;
     this->_pixels->len    = len;
 
-    this->_mode = new ModeNone();
+    this->_mode = new ModeUnified();
 }
 
 Block::~Block() {
     // reset pixels
     CRGB* pix = this->_pixels->colors;
     for (int i = 0; i < this->_pixels->len; i++) {
-        pix[i].r = 0;
-        pix[i].g = 0;
-        pix[i].b = 0;
-        pix++;
+        pix[i] = CRGB(0, 0, 0);
     }
 
     // clean up
@@ -54,7 +51,9 @@ void Block::render() {
 }
 
 void Block::mode(Mode* m) {
+    Serial.println("deleting old mode");
     delete this->_mode;
+    Serial.println("installing new mode");
     this->_mode = m;
 }
 

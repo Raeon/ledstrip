@@ -61,10 +61,7 @@ void RGBA::serialize(JsonObject& parent, const String& key) {
     this->serialize(root);
 }
 
-JsonError* RGBA::deserialize(JsonObject& parent, RGBA** p, const String& key) {
-    if (!parent.containsKey(key)) return new JsonError("missing key: " + key);
-
-    JsonObject& root = parent[key];
+JsonError* RGBA::deserialize(JsonObject& root, RGBA** p) {
     JsonError* e;
     uint8_t r, g, b, a;
 
@@ -72,8 +69,18 @@ JsonError* RGBA::deserialize(JsonObject& parent, RGBA** p, const String& key) {
         || (e = json_uint8_t(root, &g, "g"))
         || (e = json_uint8_t(root, &b, "b"))
         || (e = json_uint8_t(root, &a, "a")))
-        return e->trace("when parsing RGBA: " + key);
+        return e->trace("when parsing RGBA");
 
     *p = new RGBA(r, g, b, a);
     return NULL;
+}
+
+
+JsonError* RGBA::deserialize(JsonObject& parent, RGBA** p, const String& key) {
+    if (!parent.containsKey(key)) return new JsonError("missing key: " + key);
+    JsonObject& root = parent[key];
+    JsonError* e = RGBA::deserialize(root, p);
+    if (e)
+        e->trace("RGBA key: " + key);
+    return e;
 }

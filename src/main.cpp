@@ -7,6 +7,7 @@
 #include "FastLED.h"
 #include "block.h"
 #include "event/blink.h"
+#include "mode/unified.h"
 #include "json.h"
 #include <Ticker.h>
 
@@ -39,8 +40,11 @@ void setup() {
     // LEDs
     FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);
     FastLED.setBrightness(50);
-    for (int i = 0; i < NUM_LEDS; i++)
-        leds[i] = CRGB(255, 0, 0); // default is RED
+    for (int i = 0; i < NUM_LEDS; i++) {
+        leds[i].r = 255; // default is red
+        leds[i].g = 0;
+        leds[i].b = 0;
+    }
 
     // Default block
     Block* block           = new Block(leds, NUM_LEDS);
@@ -188,7 +192,6 @@ void setup() {
         Deletes the specified block and turns off all pixels.
     */
     onJSON(server, "/block/delete", HTTP_POST, [](JsonObject& root) {
-        
         size_t blockAddr;
         JsonError* e;
 
@@ -212,6 +215,44 @@ void setup() {
 
         // return success
         server.send(200, "application/json", "{\"result\": true}");
+    });
+
+    /*
+        MODES
+    */
+
+    /**/
+    onJSON(server, "/mode/unified", HTTP_POST, [](JsonObject& root) {
+        JsonError* e;
+        size_t blockAddr;
+        Block* block;
+        Mode* mode;
+
+        // block identifier
+        if (e = json_size_t(root, &blockAddr, "block")) {
+            server.send(400, "text/plain", e->tostr());
+            delete e;
+            return;
+        }
+
+        // check validity
+        if (blocks.find(blockAddr) == blocks.end()) {
+            server.send(404, "text/plain", "block does not exist");
+            return;
+        }
+        block = blocks[blockAddr];
+
+        // mode
+        if (e = ModeUnified::deserialize(root, &mode)) {
+            Serial.println("failed at deserializing mode");
+            server.send(400, "text/plain", e->tostr());
+            delete e;
+            return;
+        }
+
+        // update block mode
+        block->mode(mode);
+        server.send(200, "text/plain", "ok");
     });
 
     /*
