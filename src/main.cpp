@@ -244,7 +244,6 @@ void setup() {
 
         // mode
         if (e = ModeUnified::deserialize(root, &mode)) {
-            Serial.println("failed at deserializing mode");
             server.send(400, "text/plain", e->tostr());
             delete e;
             return;

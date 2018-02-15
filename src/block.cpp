@@ -51,9 +51,7 @@ void Block::render() {
 }
 
 void Block::mode(Mode* m) {
-    Serial.println("deleting old mode");
     delete this->_mode;
-    Serial.println("installing new mode");
     this->_mode = m;
 }
 
