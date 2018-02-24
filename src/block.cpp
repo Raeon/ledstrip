@@ -21,8 +21,8 @@ Block::~Block() {
     delete this->_mode;
 }
 
-void Block::configure(JsonObject& conf) {
-    this->_mode->configure(conf);
+void Block::update(JsonObject& root) {
+    this->_mode->update(root);
 }
 
 void Block::render() {

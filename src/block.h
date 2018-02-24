@@ -19,7 +19,7 @@ public:
     Block(CRGB* pixv, uint16_t pixc);
     ~Block();
 
-    void configure(JsonObject& conf);
+    void update(JsonObject& root);
     void render();
 
     void mode(Mode* m);

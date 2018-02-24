@@ -23,9 +23,12 @@ public:
     const String& tostr();
 };
 
+void json_try(JsonError* e);
+
 JsonError* json_object(JsonObject& root, const String& key);
 JsonError* json_array(JsonObject& root, const String& key);
 JsonError* json_size_t(JsonObject& root, size_t* p, const String& key);
+JsonError* json_bool(JsonObject& root, bool* p, const String& key);
 JsonError* json_uint8_t(JsonObject& root, uint8_t* p, const String& key);
 JsonError* json_uint16_t(JsonObject& root, uint16_t* p, const String& key);
 

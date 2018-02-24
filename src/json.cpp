@@ -53,6 +53,12 @@ void onJSON(ESP8266WebServer& server, const String& uri, HTTPMethod method, Json
     });
 }
 
+void json_try(JsonError* e) {
+    if (e != NULL) {
+        delete e;
+    }
+}
+
 JsonError* json_object(JsonObject& root, const String& key) {
     if (!root.containsKey(key)) return new JsonError("object missing: " + key);
     if (!root[key].is<JsonObject>()) return new JsonError("not an object: " + key);
@@ -68,6 +74,12 @@ JsonError* json_array(JsonObject& root, const String& key) {
 JsonError* json_size_t(JsonObject& root, size_t* p, const String& key) {
     if (!root.containsKey(key)) return new JsonError("size_t missing: " + key);
     *p = root[key].as<size_t>();
+    return NULL;
+}
+
+JsonError* json_bool(JsonObject& root, bool* p, const String& key) {
+    if (!root.containsKey(key)) return new JsonError("uint8_t missing: " + key);
+    *p = root[key].as<bool>();
     return NULL;
 }
 

@@ -6,8 +6,8 @@
 
 class Mode {
 public:
-    virtual void configure(JsonObject& conf) = 0;
-    virtual void render(Pixels* pixels)      = 0;
+    virtual JsonError* update(JsonObject& conf) = 0;
+    virtual void render(Pixels* pixels)         = 0;
 
     virtual void serialize(JsonObject& root);
     virtual void serialize(JsonObject& parent, const String& key);

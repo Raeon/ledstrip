@@ -19,7 +19,8 @@ private:
 public:
     ModeUnified();
     ~ModeUnified();
-    void configure(JsonObject& conf);
+
+    JsonError* update(JsonObject& conf);
     void render(Pixels* pixels);
 
     void serialize(JsonObject& root);

@@ -31,12 +31,13 @@ ModeUnified::~ModeUnified() {
         for (int i = 0; i < this->_colorCount; i++) {
             delete this->_colors[i];
         }
-        if (this->_colorCount > 0)
+        if (this->_colorCount > 0) {
             delete this->_colors;
+        }
     }
 }
 
-void ModeUnified::configure(JsonObject& conf) {
+JsonError* ModeUnified::update(JsonObject& conf) {
     // TODO
 }
 

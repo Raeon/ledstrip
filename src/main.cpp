@@ -8,6 +8,7 @@
 #include "block.h"
 #include "event/blink.h"
 #include "mode/unified.h"
+#include "mode/progress.h"
 #include "json.h"
 #include <Ticker.h>
 
@@ -221,7 +222,6 @@ void setup() {
         MODES
     */
 
-    /**/
     onJSON(server, "/mode/unified", HTTP_POST, [](JsonObject& root) {
         JsonError* e;
         size_t blockAddr;
@@ -251,6 +251,63 @@ void setup() {
 
         // update block mode
         block->mode(mode);
+        server.send(200, "text/plain", "ok");
+    });
+
+    onJSON(server, "/mode/progress", HTTP_POST, [](JsonObject& root) {
+        JsonError* e;
+        size_t blockAddr;
+        Block* block;
+        Mode* mode;
+
+        // block identifier
+        if (e = json_size_t(root, &blockAddr, "block")) {
+            server.send(400, "text/plain", e->tostr());
+            delete e;
+            return;
+        }
+
+        // check validity
+        if (blocks.find(blockAddr) == blocks.end()) {
+            server.send(404, "text/plain", "block does not exist");
+            return;
+        }
+        block = blocks[blockAddr];
+
+        // mode
+        if (e = ModeProgress::deserialize(root, &mode)) {
+            server.send(400, "text/plain", e->tostr());
+            delete e;
+            return;
+        }
+
+        // update block mode
+        block->mode(mode);
+        server.send(200, "text/plain", "ok");
+    });
+
+    onJSON(server, "/mode/update", HTTP_POST, [](JsonObject& root) {
+        JsonError* e;
+        size_t blockAddr;
+        Block* block;
+        Mode* mode;
+
+        // block identifier
+        if (e = json_size_t(root, &blockAddr, "block")) {
+            server.send(400, "text/plain", e->tostr());
+            delete e;
+            return;
+        }
+
+        // check validity
+        if (blocks.find(blockAddr) == blocks.end()) {
+            server.send(404, "text/plain", "block does not exist");
+            return;
+        }
+        block = blocks[blockAddr];
+
+        // update mode parameters
+        block->update(root);
         server.send(200, "text/plain", "ok");
     });
 
@@ -301,7 +358,7 @@ void setup() {
     server.begin();
 
     Serial.println("HTTP server started");
-    ticker.attach_ms(20, []() {
+    ticker.attach_ms(25, []() {
         for (std::unordered_map<size_t, Block*>::iterator iter = blocks.begin(); iter != blocks.end(); iter++) {
             iter->second->render();
         }

@@ -31,6 +31,7 @@ public:
     RGBA** gradient(RGBA* to, int c);
     CRGB to_crgb();
     void into_crgb(CRGB& crgb);
+    void clone(RGBA** to);
 
     void serialize(JsonObject& root);
     void serialize(JsonObject& parent, const String& key);

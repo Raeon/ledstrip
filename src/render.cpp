@@ -49,6 +49,10 @@ void RGBA::into_crgb(CRGB& crgb) {
     crgb.b = ((double) this->b) * (((double) this->a) / (double) 255.0);
 }
 
+void RGBA::clone(RGBA** p) {
+    *p = new RGBA(this->r, this->g, this->b, this->a);
+}
+
 void RGBA::serialize(JsonObject& root) {
     root["g"] = this->g;
     root["r"] = this->r;
