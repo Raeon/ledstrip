@@ -138,6 +138,8 @@ void ModeProgress::render(Pixels* pixels) {
             pixels->colors[i].b = 0;
         }
     }
+
+    delete color;
 }
 
 void ModeProgress::serialize(JsonObject& root) {
